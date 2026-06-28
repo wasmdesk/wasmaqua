@@ -2277,17 +2277,12 @@ class Compositor
     active = win.focused?
     tx, ty, tw, _th = win.titlebar_rect
 
-    # Titlebar: active = vertical gradient (TITLE_ACTIVE -> TITLE_ACTIVE_2);
-    # inactive = flat TITLE_INACTIVE band so the user reads which window has
-    # the keyboard focus at a glance. We fake the gradient by painting two
-    # bands stacked top/bottom and a single hairline in the middle — keeps the
-    # draw path purely fillRect calls (no createLinearGradient round-trip
-    # through the JS bridge, which doesn't return chained-method objects in
-    # this build of go-embedded-ruby).
+    # Titlebar: flat fill (matches modern Big Sur+ macOS — no gradient).
+    # Active uses TITLE_ACTIVE (lighter), inactive uses TITLE_INACTIVE.
+    # User reads keyboard focus from the title text color + traffic-light
+    # button saturation, not from the bar gradient.
     if active
-      half = Theme::TITLE_H / 2
-      fill_rect([tx, ty,          tw, half],                   Theme::TITLE_ACTIVE)
-      fill_rect([tx, ty + half,   tw, Theme::TITLE_H - half],  Theme::TITLE_ACTIVE_2)
+      fill_rect(win.titlebar_rect, Theme::TITLE_ACTIVE)
     else
       fill_rect(win.titlebar_rect, Theme::TITLE_INACTIVE)
     end
