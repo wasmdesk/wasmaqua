@@ -1,0 +1,70 @@
+# Taskfile for wasmaqua — https://taskfile.dev
+#
+#   task            # list the available tasks
+#   task build      # build wasmaqua.wasm (embeds compositor.rb)
+#   task serve      # build, then serve http://localhost:8081/ with COOP/COEP
+#   task test       # run native Go + Ruby unit tests (rbtest)
+#   task clean      # remove the build artifacts
+#
+# wasmaqua is the macOS-Aqua-themed sibling of wasmbox. It embeds the same Ruby
+# compositor (forked, themed) into a wasm via //go:embed and exposes the SAME
+# external-client protocol, so the same hello / dock / quake / terminal / files
+# wasm clients work unmodified — only the window decoration differs.
+version: "3"
+
+vars:
+  PORT: "8081"
+
+tasks:
+  default:
+    desc: List the available tasks
+    silent: true
+    cmds:
+      - task --list
+
+  build:
+    desc: Build wasmaqua.wasm + native dev server
+    deps: [build:compositor, build:serve]
+
+  build:compositor:
+    desc: Build wasmaqua.wasm (embeds compositor.rb)
+    env:
+      GOWORK: "off"
+      GOOS: js
+      GOARCH: wasm
+    cmds:
+      - go build -o wasmaqua.wasm .
+      - cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" ./wasm_exec.js 2>/dev/null || cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./wasm_exec.js
+    generates:
+      - wasmaqua.wasm
+      - wasm_exec.js
+
+  build:serve:
+    desc: Build the native dev server (cmd/serve) with COOP/COEP headers
+    env:
+      GOWORK: "off"
+    cmds:
+      - mkdir -p bin
+      - go build -o bin/wasmaqua-serve ./cmd/serve
+    generates:
+      - bin/wasmaqua-serve
+
+  serve:
+    desc: Build, then serve the compositor at http://localhost:{{.PORT}}/ with COOP/COEP
+    deps: [build]
+    cmds:
+      - 'echo "serving http://localhost:{{.PORT}}/ — open /index.html"'
+      - ./bin/wasmaqua-serve -addr :{{.PORT}}
+
+  test:
+    desc: Run native unit tests (Ruby pure-WM half via rbtest) — no browser required
+    env:
+      GOWORK: "off"
+    cmds:
+      - go run ./cmd/rbtest
+
+  clean:
+    desc: Remove the build artifacts
+    cmds:
+      - rm -f wasmaqua.wasm wasm_exec.js
+      - rm -rf bin

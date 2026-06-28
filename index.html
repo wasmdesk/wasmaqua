@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Establish cross-origin isolation (COOP/COEP) so SharedArrayBuffer is
+     available even on a static host that can't set headers (e.g. GitHub
+     Pages). Must run before anything that touches SharedArrayBuffer. On a
+     server that already sends the headers (cmd/serve) this is a harmless
+     no-op: crossOriginIsolated is already true, so it never registers. -->
+<script src="coi-serviceworker.js"></script>
+<title>wasmaqua compositor · a macOS-Aqua-themed Ruby window manager in your browser</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1f1f23; color: #e6e7ee;
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; overflow: hidden; }
+  /* The compositor draws the whole desktop onto this canvas. Step C: the
+     canvas backing store is transferred to a Web Worker via
+     transferControlToOffscreen(); main only owns the element + input. */
+  #screen { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh;
+    cursor: default; touch-action: none; }
+  /* Boot status, hidden once the compositor worker signals ready. The [hidden]
+     rule must be explicit: an author `display` declaration otherwise beats the
+     user-agent `[hidden] { display: none }`. */
+  #status[hidden] { display: none; }
+  #status { position: fixed; inset: 0; display: grid; place-items: center;
+    background: #1f1f23; z-index: 10; text-align: center; }
+  #status .err { color: #FF5F57; max-width: 40rem; padding: 1rem; }
+  /* On-screen legend of the controls. */
+  #legend { position: fixed; top: 10px; right: 12px; z-index: 5;
+    background: rgba(28, 28, 30, .82); border: 1px solid #3a3a3c; border-radius: 8px;
+    padding: .6rem .75rem; color: #9aa0b4; max-width: 19rem; pointer-events: none; }
+  #legend b { color: #e6e7ee; }
+  #legend kbd { background: #1d1f29; border: 1px solid #3a3d4a; border-radius: 4px;
+    padding: 0 .35em; color: #e6e7ee; }
+  #legend h1 { font-size: .82rem; margin: 0 0 .4rem; color: #28C840; }
+  #legend ul { margin: 0; padding-left: 1.1rem; }
+  #legend li { margin: .12rem 0; }
+  #legend .foot { margin-top: .5rem; color: #5b6072; }
+  #legend a { color: #28C840; }
+  #legend .tl { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    vertical-align: middle; margin-right: 2px; border: 1px solid rgba(0,0,0,0.25); }
+  #legend .tl.r { background: #FF5F57; }
+  #legend .tl.y { background: #FEBC2E; }
+  #legend .tl.g { background: #28C840; }
+</style>
+</head>
+<body>
+
+<canvas id="screen"></canvas>
+
+<aside id="legend">
+  <h1>wasmaqua compositor</h1>
+  <ul>
+    <li><span class="tl r"></span> close · <span class="tl y"></span> minimize · <span class="tl g"></span> maximize</li>
+    <li><b>Drag titlebar</b> — move a window</li>
+    <li><b>Drag bottom-right corner</b> — resize</li>
+    <li><b>Click</b> a window — focus &amp; raise</li>
+    <li><b>Right-click desktop</b> — root menu (spawn)</li>
+    <li><b>Right-click a window</b> — raise / close</li>
+    <li><kbd>Tab</kbd> — cycle focus · <kbd>Esc</kbd> — dismiss menu</li>
+  </ul>
+  <div class="foot">macOS-Aqua-themed sibling of wasmbox. Wayland-inspired
+    single-instance compositor written in pure Ruby, running in WebAssembly.
+    Three traffic-light buttons on the LEFT (à la macOS). Same external-client
+    protocol as wasmbox, so the same hello / dock / quake / terminal / files
+    wasm clients work unmodified.</div>
+</aside>
+
+<div id="status"><div>Loading the WebAssembly compositor worker…</div></div>
+
+<script src="bridge.js"></script>
+<script src="boot-config.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// Step C bootstrap. The main thread is a thin shell:
+//   - owns the <canvas> + <div id="status">
+//   - transfers the canvas's backing store to the compositor worker
+//   - forwards DOM events to the compositor worker
+//   - relays write-through localStorage messages to the real localStorage
+// All Ruby + wasm activity happens in compositor.worker.js.
+// ---------------------------------------------------------------------------
+"use strict";
+
+const B = globalThis.WASMBOX_BRIDGE;
+const statusEl = document.getElementById("status");
+const canvas = document.getElementById("screen");
+
+function fail(msg) {
+  statusEl.innerHTML = '<div class="err">' + msg + '</div>';
+  statusEl.hidden = false;
+  globalThis.wasmaquaError = msg;
+}
+
+function sizeCanvasToViewport() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+sizeCanvasToViewport();
+
+let offscreen;
+try {
+  offscreen = canvas.transferControlToOffscreen();
+} catch (e) {
+  fail("OffscreenCanvas is not available in this browser: " + e);
+  throw e;
+}
+
+const worker = new Worker("compositor.worker.js", { type: "classic" });
+
+const storageSnapshot = {};
+try {
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k != null) storageSnapshot[k] = localStorage.getItem(k);
+  }
+} catch (_) { /* private mode etc. -- harmless */ }
+
+worker.postMessage({
+  type: B.M2C_BOOT,
+  canvas: offscreen,
+  w: canvas.width,
+  h: canvas.height,
+  storage: storageSnapshot,
+}, [offscreen]);
+
+worker.addEventListener("message", (ev) => {
+  const m = ev.data;
+  if (!m || typeof m.type !== "string") return;
+  switch (m.type) {
+    case B.C2M_READY:
+      statusEl.hidden = true;
+      globalThis.wasmaquaReady = true;
+      return;
+    case B.C2M_ERROR:
+      fail("Ruby error while starting the compositor:<br><pre>" + m.message + "</pre>");
+      return;
+    case B.C2M_CONSOLE:
+      if (m.level === "error") console.error(m.text);
+      else                     console.log(m.text);
+      return;
+    case B.C2M_STORAGE_SET:
+      try { localStorage.setItem(m.key, m.value); } catch (_) { /* private mode */ }
+      return;
+    case B.C2M_STORAGE_REMOVE:
+      try { localStorage.removeItem(m.key); } catch (_) { /* private mode */ }
+      return;
+  }
+});
+
+function relayKey(kind) {
+  return (e) => {
+    if (e.key === "Tab") e.preventDefault();
+    worker.postMessage({
+      type: B.M2C_DOM_EVENT,
+      target: B.TARGET_WINDOW,
+      kind: kind,
+      key: e.key,
+      code: e.code,
+    });
+  };
+}
+window.addEventListener("keydown", relayKey("keydown"));
+window.addEventListener("keyup",   relayKey("keyup"));
+
+function relayMouse(kind) {
+  return (e) => {
+    if (kind === "contextmenu") e.preventDefault();
+    worker.postMessage({
+      type: B.M2C_DOM_EVENT,
+      target: B.TARGET_CANVAS,
+      kind: kind,
+      offsetX: e.offsetX,
+      offsetY: e.offsetY,
+      button: e.button,
+    });
+  };
+}
+canvas.addEventListener("mousedown",   relayMouse("mousedown"));
+canvas.addEventListener("mousemove",   relayMouse("mousemove"));
+canvas.addEventListener("mouseup",     relayMouse("mouseup"));
+canvas.addEventListener("contextmenu", relayMouse("contextmenu"));
+
+function relayWheel(e) {
+  e.preventDefault();
+  worker.postMessage({
+    type: B.M2C_DOM_EVENT,
+    target: B.TARGET_CANVAS,
+    kind: "wheel",
+    offsetX: e.offsetX,
+    offsetY: e.offsetY,
+    deltaX: e.deltaX,
+    deltaY: e.deltaY,
+  });
+}
+canvas.addEventListener("wheel", relayWheel, { passive: false });
+
+window.addEventListener("resize", () => {
+  worker.postMessage({ type: B.M2C_RESIZE, w: window.innerWidth, h: window.innerHeight });
+});
+
+// Public spawn hooks, kept under the wasmaqua* name; an alias is also exposed
+// under the wasmbox* names so clients that reach for the legacy hook work.
+globalThis.wasmaquaSpawnExternal = function (url) {
+  worker.postMessage({ type: B.M2C_SPAWN_EXTERNAL, url: String(url) });
+};
+globalThis.wasmaquaSpawnFromOCI = function (ref) {
+  worker.postMessage({ type: B.M2C_SPAWN_FROM_OCI, ref: String(ref) });
+};
+globalThis.wasmboxSpawnExternal = globalThis.wasmaquaSpawnExternal;
+globalThis.wasmboxSpawnFromOCI  = globalThis.wasmaquaSpawnFromOCI;
+</script>
+</body>
+</html>
