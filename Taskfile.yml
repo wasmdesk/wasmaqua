@@ -1,10 +1,15 @@
 # Taskfile for wasmaqua — https://taskfile.dev
 #
 #   task            # list the available tasks
+#   task migrate    # print the wasmbox --frame=aqua migration recipe (start here)
 #   task build      # build wasmaqua.wasm (embeds compositor.rb)
 #   task serve      # build, then serve http://localhost:8081/ with COOP/COEP
 #   task test       # run native Go + Ruby unit tests (rbtest)
 #   task clean      # remove the build artifacts
+#
+# DEPRECATED — wasmaqua is superseded by wasmbox + the AquaFrame preset
+# (one binary, both looks). Run `task migrate` for the recipe. This repo
+# stays buildable for legacy users; new decoration work goes into wasmbox.
 #
 # wasmaqua is the macOS-Aqua-themed sibling of wasmbox. It embeds the same Ruby
 # compositor (forked, themed) into a wasm via //go:embed and exposes the SAME
@@ -21,6 +26,33 @@ tasks:
     silent: true
     cmds:
       - task --list
+
+  migrate:
+    desc: "DEPRECATED — print the wasmbox --frame=aqua migration recipe"
+    silent: true
+    cmds:
+      - |
+        echo ""
+        echo "wasmaqua is superseded by wasmbox + the AquaFrame preset."
+        echo ""
+        echo "Migration recipe (one terminal):"
+        echo ""
+        echo "  cd ../wasmbox          # sibling repo"
+        echo "  pkgx task build:compositor"
+        echo "  pkgx task serve        # serves http://localhost:8080/"
+        echo ""
+        echo "Then open one of:"
+        echo ""
+        echo "  http://localhost:8080/?frame=aqua                    # bare Aqua (= old wasmaqua)"
+        echo "  http://localhost:8080/?frame=aqua-whitesur-light     # Aqua + WhiteSur palette ≈ macOS Big Sur"
+        echo "  http://localhost:8080/?frame=aqua-whitesur-dark      # ≈ Big Sur dark"
+        echo "  http://localhost:8080/?frame=aqua-juno               # Aqua + Juno teal palette"
+        echo "  http://localhost:8080/?frame=aqua-adwaita-light"
+        echo "  http://localhost:8080/?frame=aqua-adwaita-dark"
+        echo "  http://localhost:8080/?frame=aqua-solarized-light"
+        echo "  http://localhost:8080/?frame=aqua-solarized-dark"
+        echo ""
+        echo "Full registry: see wasmbox/compositor/02_frame.rb (FrameRegistry::TABLE)"
 
   build:
     desc: Build wasmaqua.wasm + native dev server

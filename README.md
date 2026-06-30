@@ -21,7 +21,37 @@
 
 ---
 
-## Why a second WM?
+## ⚠️ Superseded by `wasmbox --frame=aqua`
+
+**As of 2026-06-30**, the wasmaqua look-and-feel is bundled into
+wasmbox itself as the `AquaFrame` window-decoration preset. One
+binary, one codebase, two looks (and counting):
+
+```text
+# Openbox look (wasmbox default)
+http://localhost:8080/
+
+# Aqua look (what wasmaqua shipped)
+http://localhost:8080/?frame=aqua
+
+# Aqua chrome + WhiteSur palette ≈ macOS Big Sur
+http://localhost:8080/?frame=aqua-whitesur-light
+```
+
+See [wasmbox/compositor/02_frame.rb](https://github.com/wasmdesk/wasmbox/blob/main/compositor/02_frame.rb)
+for the Frame strategy + the 16-entry FrameRegistry (2 plain layouts
++ 14 layout×palette combos covering Adwaita / Juno / WhiteSur /
+Solarized).
+
+This repo is **frozen** but kept buildable for legacy users; new
+decoration work goes into wasmbox. Migration is a one-flag change
+on the URL — no client-side changes needed because the
+external-client wire protocol was always identical between wasmbox
+and wasmaqua.
+
+---
+
+## Why a second WM? (historical)
 
 `wasmbox` ships an Openbox/Fluxbox-style decoration (single close-X on the
 right, dark red titlebar). `wasmaqua` is the same compositor codebase
