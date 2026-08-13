@@ -433,6 +433,59 @@ globalThis.wasmboxBlitFromSAB = function (ctx, slot, dx, dy, sx, sy, sw, sh) {
   ctx.drawImage(slot.canvas, sx, sy, sw, sh, dx + sx, dy + sy, sw, sh);
 };
 
+// Blit an OPAQUE RGBA buffer (row-major, w*h*4 bytes, base64-encoded) at
+// (dx, dy) via putImageData. Used by the widgets-painted menu (an opaque
+// panel). To avoid decoding + allocating a fresh ImageData every rAF frame
+// (the menu is re-composited each frame because draw_desktop repaints the
+// canvas background — the same Firefox-GC churn wasmboxBlitFromSAB guards
+// against), the caller passes a per-panel cache `key` and only sends a
+// non-empty `b64` when that panel's content actually changed; an empty `b64`
+// re-presents the cached ImageData for `key`. putImageData overwrites (no
+// source-over), which is correct because a menu panel is opaque.
+globalThis.wasmboxBlitRGBA = function (ctx, b64, w, h, dx, dy, key) {
+  const cache = (globalThis.__wasmboxRGBACache ||= {});
+  let slot = cache[key];
+  if (b64 && b64.length) {
+    const bin = atob(b64);
+    const n = bin.length;
+    const buf = new Uint8ClampedArray(n);
+    for (let i = 0; i < n; i++) buf[i] = bin.charCodeAt(i);
+    slot = cache[key] = new ImageData(buf, w, h);
+  }
+  if (!slot) return;
+  ctx.putImageData(slot, dx, dy);
+};
+
+// Blit a TRANSLUCENT RGBA buffer (same layout as wasmboxBlitRGBA) at (dx, dy),
+// alpha-composited (source-over) onto whatever is already on the canvas —
+// unlike wasmboxBlitRGBA, which putImageData-OVERWRITES. The Aqua window
+// decoration (AquaChrome / draw_window_frame_widgets) renders the titlebar,
+// buttons, border, shadow + grip on a TRANSPARENT (A=0) body hole, so it must
+// blend over the already-painted window body rather than punch a rectangle
+// through it.
+//
+// putImageData ignores the destination and cannot blend, so we stage the buffer
+// in a per-key OffscreenCanvas and drawImage() it (which honours source-over).
+// The staged canvas is cached per `key`: an empty `b64` re-draws the cached
+// canvas, so a frame whose chrome is unchanged costs one drawImage, not a decode
+// + ImageData + base64 round-trip every rAF frame. Same cache contract as
+// wasmboxBlitRGBA.
+globalThis.wasmboxBlitRGBAOver = function (ctx, b64, w, h, dx, dy, key) {
+  const cache = (globalThis.__wasmboxRGBAOverCache ||= {});
+  let slot = cache[key];
+  if (b64 && b64.length) {
+    const bin = atob(b64);
+    const n = bin.length;
+    const buf = new Uint8ClampedArray(n);
+    for (let i = 0; i < n; i++) buf[i] = bin.charCodeAt(i);
+    const oc = new OffscreenCanvas(w, h);
+    oc.getContext("2d").putImageData(new ImageData(buf, w, h), 0, 0);
+    slot = cache[key] = oc;
+  }
+  if (!slot) return;
+  ctx.drawImage(slot, dx, dy);
+};
+
 globalThis.wasmboxMakeObject = function () {
   const o = {};
   for (let i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1];
