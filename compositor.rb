@@ -1228,6 +1228,32 @@ class Menu
       cy += row_h
     end
   end
+
+  # Translate this menu's entries into the Ruby Array-of-Hashes the
+  # go-widgets `Widgets.menu` constructor accepts (keys: "label" /
+  # "separator" / "shortcut"). Pure: no JS, no widget handle — the actual
+  # render lives in Compositor#blit_menu_panel (the JS-touching half).
+  #
+  # Every selectable row carries a non-empty "action" marker so the toolkit
+  # paints it enabled (the toolkit greys out action-less rows); our submenu
+  # parents (Applications / Workspaces / ...) carry a :submenu rather than an
+  # :action, so we synthesise the marker here. The marker is never dispatched
+  # through the widget event seam — click routing stays in Ruby (hit_test).
+  # A submenu parent gets a ">" chevron as its right-edge shortcut, matching
+  # the hand-drawn draw_menu_panel chevron.
+  def widget_items
+    items = []
+    @entries.each do |e|
+      if e[:separator]
+        items << { "separator" => true }
+      else
+        item = { "label" => e[:label].to_s, "action" => "x" }
+        item["shortcut"] = ">" if e[:submenu]
+        items << item
+      end
+    end
+    items
+  end
 end
 
 # ---------------------------------------------------------------------------
@@ -1326,10 +1352,91 @@ module RootMenu
 end
 
 # ---------------------------------------------------------------------------
+# AquaChrome — the macOS-Aqua window decoration expressed as a go-widgets
+# `Widgets.decoration` spec Hash (2026-08-13). This is the widgets twin of the
+# hand-drawn Compositor#draw_window / #draw_traffic_light path: it re-expresses
+# the SAME colours + geometry (the Theme::* palette + the Window#*_rect hit
+# rects) as data, in FRAME-LOCAL coordinates, so the compositor can render the
+# chrome into one per-window buffer and composite it AROUND the window body
+# (see Compositor#draw_window_frame_widgets, the wasmaqua analogue of wasmbox's
+# compositor/11_frame_widgets.rb).
+#
+# Pure: builds a Hash from Theme constants + the window's own rects; no JS, no
+# widget handle. Hit-testing stays the single source of truth — Window#*_rect
+# is what both the spec and the mouse router read, so paint and hit-testing can
+# never drift apart.
+module AquaChrome
+  module_function
+
+  # Traffic-light dim colours when the window is unfocused (matches
+  # Compositor#draw_traffic_light's inactive branch).
+  TL_DIM_FILL = "#C7C7CC"
+  TL_DIM_OUT  = "#B0B0B5"
+
+  # Translate a surface rect [x, y, w, h] into the frame's own coordinate space
+  # (origin at the frame top-left = win.x, win.frame_top) — the space the
+  # WindowDecoration widget paints in.
+  def frame_local(win, rect)
+    [rect[0] - win.x, rect[1] - win.frame_top, rect[2], rect[3]]
+  end
+
+  # Build the WindowDecoration spec Hash for `win` at focus state `active`.
+  # Centred title, a bottom hairline, three left-clustered traffic-light
+  # circles (close / minimize / maximize), and — unless shaded — a frame
+  # border + faux drop shadow + resize grip. Traffic-lights grey out when
+  # inactive, exactly as the canvas path does.
+  def decoration_spec(win, active)
+    cf = active ? Theme::CLOSE_RED  : TL_DIM_FILL ; co = active ? Theme::CLOSE_RED_OUT  : TL_DIM_OUT
+    mf = active ? Theme::MIN_YELLOW : TL_DIM_FILL ; mo = active ? Theme::MIN_YELLOW_OUT : TL_DIM_OUT
+    xf = active ? Theme::MAX_GREEN  : TL_DIM_FILL ; xo = active ? Theme::MAX_GREEN_OUT  : TL_DIM_OUT
+    spec = {
+      "title"        => win.title,
+      "title_ink"    => active ? Theme::TITLE_TEXT_ON : Theme::TITLE_TEXT_OFF,
+      "title_color"  => active ? Theme::TITLE_ACTIVE : Theme::TITLE_INACTIVE,
+      "titlebar"     => frame_local(win, win.titlebar_rect),
+      "title_center" => true,
+      "hairline"     => Theme::TITLE_BORDER,
+      "grip_color"   => Theme::RESIZE_GRIP,
+      "buttons"      => [
+        { "rect" => frame_local(win, win.close_rect),    "shape" => "circle", "face" => cf, "outline" => co },
+        { "rect" => frame_local(win, win.minimize_rect), "shape" => "circle", "face" => mf, "outline" => mo },
+        { "rect" => frame_local(win, win.maximize_rect), "shape" => "circle", "face" => xf, "outline" => xo },
+      ],
+    }
+    unless win.shaded?
+      spec["border"]       = frame_local(win, win.frame_rect)
+      spec["border_color"] = active ? Theme::BORDER_ACTIVE : Theme::BORDER_INACTIVE
+      spec["shadow"]       = Theme::SHADOW
+      spec["grip"]         = frame_local(win, win.resize_rect)
+      spec["show_grip"]    = true
+    end
+    spec
+  end
+end
+
+# ---------------------------------------------------------------------------
 # Compositor — owns the WM, the canvas and the input/render loop. This is the
 # only part that talks to the JS bridge.
 # ---------------------------------------------------------------------------
 class Compositor
+  # --- go-widgets binding (2026-08-13) ------------------------------------
+  # Requiring the binding here (inside the JS-touching Compositor class, which
+  # cmd/rbtest deliberately skips) keeps the pure-WM test free of the widgets
+  # stack while doubling as a boot-time smoke test: if `require "widgets"` did
+  # not register in the wasm build the program would raise on load.
+  require "widgets"
+  require "base64"
+  # Aqua's decoration + menu read as a LIGHT surface (title #ECECEC band, menu
+  # #FAFAFA), so the toolkit's light palette lands closest to the canvas look.
+  Widgets.set_theme("light")
+
+  # Master switches for the widgets-painted chrome + menu. Setting either to
+  # `false` falls straight back to the hand-drawn path (draw_window's inline
+  # chrome / draw_menu_panel) with zero other changes — the shippable fallback
+  # while the compositor is co-edited live.
+  FRAME_WIDGETS = true
+  MENU_WIDGETS  = true
+
   def initialize(wm)
     @wm = wm
     @drag = nil      # {win:, mode: :move|:resize, dx:, dy:}
@@ -1888,6 +1995,7 @@ class Compositor
     if win.on_close?(mx, my)
       dismiss_popups(@wm.child_popups(win.id))  # notify any orphaned popups first
       @wm.close(win)
+      forget_frame_cache(win.id)
       notify_closed(win, "user")
       notify_windows_changed
     elsif win.on_minimize?(mx, my)
@@ -2142,6 +2250,7 @@ class Compositor
       win = @wm.find(arg.to_i)
       if win
         @wm.close(win)
+        forget_frame_cache(win.id)
         notify_closed(win, "user")
         notify_windows_changed
       end
@@ -2275,6 +2384,17 @@ class Compositor
     end
 
     active = win.focused?
+
+    # Widgets path (2026-08-13): paint the body, then composite the Aqua
+    # decoration over it through the go-widgets binding. The inline hand-drawn
+    # chrome below is the fallback (FRAME_WIDGETS = false). Hit-testing is
+    # unchanged either way — Window#*_rect stays the single source of truth.
+    if FRAME_WIDGETS
+      draw_window_body(win)
+      draw_window_frame_widgets(win, active)
+      return
+    end
+
     tx, ty, tw, _th = win.titlebar_rect
 
     # Titlebar: flat fill (matches modern Big Sur+ macOS — no gradient).
@@ -2364,6 +2484,120 @@ class Compositor
     @ctx.call("stroke")
   end
 
+  # --- widgets paint path (2026-08-13) ------------------------------------
+  # The wasmaqua analogue of wasmbox's compositor/11_frame_widgets.rb (frame)
+  # and compositor/08_menu_widgets.rb (menu): only the PAINT moves to the
+  # go-widgets toolkit; the pure WM model (Window / Menu / WindowManager) and
+  # all hit-testing are untouched, so behaviour is identical — only the pixels
+  # come from the toolkit painter now.
+
+  # Paint just the client body (no decoration). A shaded ("rolled up") window
+  # shows no body. External windows blit their SharedArrayBuffer; in-process
+  # windows paint a solid fill.
+  def draw_window_body(win)
+    return if win.shaded?
+    if win.external?
+      blit_external(win)
+    else
+      fill_rect(win.body_rect, win.fill)
+    end
+  end
+
+  # Paint `win`'s Aqua decoration through the widgets binding, composited over
+  # the already-painted body. `active` is win.focused?.
+  #
+  # Per-window render-once cache: the compositor re-composites every rAF frame
+  # (draw_desktop repaints the background), but a window's chrome pixels only
+  # change when its size / focus / title / shade state does — NOT when it merely
+  # moves (a drag re-presents the cached buffer at the new origin) or when its
+  # body repaints. So the buffer is memoised per window on a content signature
+  # and re-rendered ONLY on change; in between, an empty base64 re-presents the
+  # JS-side cached OffscreenCanvas (one drawImage), bounding the per-frame cost
+  # to a single composite (the Firefox-GC hazard the SAB blit path documents).
+  def draw_window_frame_widgets(win, active)
+    title_h = Theme::TITLE_H
+    fw = win.w
+    fh = win.shaded? ? title_h : title_h + win.h
+    # Aqua paints a 1px faux drop shadow one unit past the frame's right +
+    # bottom edges; widen the buffer to hold it. A shaded window has no shadow.
+    margin = win.shaded? ? 0 : 1
+    bw = fw + margin
+    bh = fh + margin
+    dx = win.x
+    dy = win.frame_top
+    key = "frame#{win.id}"
+
+    @frame_sig = {} if @frame_sig.nil?
+    sig = "#{fw}x#{fh}|#{active}|#{win.shaded?}|#{win.title}"
+    if @frame_sig[key] == sig
+      JS.global.call("wasmboxBlitRGBAOver", @ctx, "", bw, bh, dx, dy, key)
+      return
+    end
+
+    handle = Widgets.decoration(AquaChrome.decoration_spec(win, active))
+    Widgets.layout(handle, bw, bh)
+    img = Widgets.render(handle, bw, bh)
+    b64 = Base64.strict_encode64(img["pixels"])
+    @frame_sig[key] = sig
+    JS.global.call("wasmboxBlitRGBAOver", @ctx, b64, bw, bh, dx, dy, key)
+  end
+
+  # Drop a closed window's cached frame signature. wasmaqua ids are monotonic
+  # (never reused), so this is housekeeping rather than a correctness fix, but
+  # it keeps the cache from growing without bound across a long session.
+  def forget_frame_cache(win_id)
+    @frame_sig.delete("frame#{win_id}") if @frame_sig
+  end
+
+  # Paint the open menu (and its open submenu, if any) via the widgets binding.
+  # Mirrors draw_menu's two-panel structure.
+  def draw_menu_widgets
+    state = @menu
+    blit_menu_panel("menu", state[:menu], state[:x], state[:y],
+                    state[:hover], state[:submenu_idx])
+    if state[:submenu]
+      blit_menu_panel("sub", state[:submenu], state[:submenu_x], state[:submenu_y],
+                      state[:submenu_hover], -1)
+    end
+  end
+
+  # Build a Widgets menu tree from `menu`'s entries, render it to an RGBA buffer
+  # and putImageData it at (x, y) through the JS helper. Memoised per panel
+  # `key` on a content signature (the highlighted / open-submenu row is part of
+  # the signature so a hover change re-renders); an unchanged signature sends an
+  # empty buffer and the JS helper re-presents its cached ImageData.
+  def blit_menu_panel(key, menu, x, y, hover, open_sub_idx)
+    @mw_sig = {} if @mw_sig.nil?
+    w = Menu::WIDTH
+    h = menu.height
+    sig = menu_paint_sig(key, menu, w, h, hover, open_sub_idx)
+    if @mw_sig[key] == sig
+      JS.global.call("wasmboxBlitRGBA", @ctx, "", w, h, x, y, key)
+      return
+    end
+    handle = Widgets.menu(menu.widget_items)
+    Widgets.layout(handle, w, h)
+    img = Widgets.render(handle, w, h)
+    b64 = Base64.strict_encode64(img["pixels"])
+    @mw_sig[key] = sig
+    JS.global.call("wasmboxBlitRGBA", @ctx, b64, w, h, x, y, key)
+  end
+
+  # A cheap content signature for a menu panel: key, pixel size, the highlighted
+  # row + the open-submenu row, and the ordered labels (+ chevron / separator
+  # markers). Changes whenever the visible content changes.
+  def menu_paint_sig(key, menu, w, h, hover, open_sub_idx)
+    parts = [key, w.to_s, h.to_s, "hv#{hover}", "sub#{open_sub_idx}"]
+    menu.entries.each do |e|
+      if e[:separator]
+        parts << "-"
+      else
+        parts << "#{e[:label]}#{e[:submenu] ? '>' : ''}"
+      end
+    end
+    parts.join("|")
+  end
+
   # Blit an external window's SharedArrayBuffer onto the canvas. Chrome forbids
   # constructing an ImageData over a SAB-backed Uint8ClampedArray, so the JS
   # helper wasmboxBlitFromSAB() owns a non-shared ImageData and copies the
@@ -2380,6 +2614,7 @@ class Compositor
   # use the Theme::MENU_* palette: MENU_BG fill, MENU_BORDER 1-px frame,
   # MENU_TEXT label ink, and MENU_HILITE band for the hovered row.
   def draw_menu
+    return draw_menu_widgets if MENU_WIDGETS
     state = @menu
     draw_menu_panel(state[:menu], state[:x], state[:y], state[:hover],
                     state[:submenu_idx])

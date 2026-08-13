@@ -194,4 +194,65 @@ assert_eq([pn.x, pn.y, pn.w, pn.h], before, "panel zoom_toggle is a no-op")
 
 # (LAYOUT_KEY namespace check is done in the file diff — the constant lives
 #  inside class Compositor, which the rbtest split skips.)
+
+# ---- AquaChrome.decoration_spec (widgets paint spec, pure) ----------------
+# The spec re-expresses the SAME colours + geometry the hand-drawn
+# draw_window path uses, in FRAME-LOCAL coordinates. It feeds Widgets.decoration
+# (the JS-touching render lives in class Compositor, skipped here) so only the
+# pure Hash builder is asserted.
+dw = Window.new(30, "xterm", 60, 60, 240, 180, "#ffffff")
+# frame_local: surface rect -> frame-space (origin at win.x, frame_top).
+assert_eq(AquaChrome.frame_local(dw, [dw.x + 8, dw.frame_top + 8, 12, 12]), [8, 8, 12, 12],
+          "frame_local translates to frame-space origin")
+# Active spec.
+sa = AquaChrome.decoration_spec(dw, true)
+assert_eq(sa["title"],        "xterm",               "spec carries the title")
+assert(sa["title_center"],                           "Aqua title is centred")
+assert_eq(sa["title_color"],  Theme::TITLE_ACTIVE,   "active titlebar = TITLE_ACTIVE")
+assert_eq(sa["title_ink"],    Theme::TITLE_TEXT_ON,  "active title ink = TITLE_TEXT_ON")
+assert_eq(sa["hairline"],     Theme::TITLE_BORDER,   "spec has the titlebar hairline")
+assert_eq(sa["titlebar"],     [0, 0, 240, Theme::TITLE_H], "titlebar rect is frame-local, full width")
+assert_eq(sa["buttons"].length, 3,                   "three traffic-light buttons")
+assert_eq(sa["buttons"][0]["shape"], "circle",       "close button is a circle")
+assert_eq(sa["buttons"][0]["face"],  Theme::CLOSE_RED,  "active close = CLOSE_RED")
+assert_eq(sa["buttons"][0]["rect"],  [8, 8, 12, 12], "close rect is frame-local")
+assert_eq(sa["buttons"][1]["face"],  Theme::MIN_YELLOW, "active minimize = MIN_YELLOW")
+assert_eq(sa["buttons"][2]["face"],  Theme::MAX_GREEN,  "active maximize = MAX_GREEN")
+assert_eq(sa["border_color"], Theme::BORDER_ACTIVE,  "active border = BORDER_ACTIVE")
+assert_eq(sa["shadow"],       Theme::SHADOW,         "unshaded spec has the drop shadow")
+assert(sa["show_grip"],                              "unshaded spec shows the resize grip")
+assert_eq(sa["grip_color"],   Theme::RESIZE_GRIP,    "grip colour = RESIZE_GRIP")
+# Inactive spec: traffic-lights grey out, title + border dim.
+si = AquaChrome.decoration_spec(dw, false)
+assert_eq(si["title_color"],  Theme::TITLE_INACTIVE, "inactive titlebar = TITLE_INACTIVE")
+assert_eq(si["title_ink"],    Theme::TITLE_TEXT_OFF, "inactive title ink = TITLE_TEXT_OFF")
+assert_eq(si["border_color"], Theme::BORDER_INACTIVE,"inactive border = BORDER_INACTIVE")
+assert_eq(si["buttons"][0]["face"], AquaChrome::TL_DIM_FILL, "inactive close greys out")
+assert(si["buttons"][0]["face"] != sa["buttons"][0]["face"], "active/inactive close differ")
+# Shaded window: only titlebar + buttons, no border / grip / shadow.
+dw.shaded = true
+ss = AquaChrome.decoration_spec(dw, true)
+assert(!ss.key?("border"),    "shaded spec has no border")
+assert(!ss.key?("grip"),      "shaded spec has no resize grip")
+assert(!ss.key?("shadow"),    "shaded spec has no drop shadow")
+assert_eq(ss["buttons"].length, 3, "shaded spec still shows the three buttons")
+
+# ---- Menu#widget_items (widgets menu builder, pure) ----------------------
+mroot = RootMenu.build(WindowManager.new)
+items = mroot.widget_items
+assert_eq(items.length, mroot.entries.length, "one widget item per menu entry")
+# A submenu parent (Applications) carries a ">" chevron shortcut + an action.
+apps = items.find { |it| it["label"] == "Applications" }
+assert(!apps.nil?,                     "Applications entry present in widget items")
+assert_eq(apps["shortcut"], ">",       "submenu parent gets a chevron shortcut")
+assert_eq(apps["action"],   "x",       "submenu parent carries an action marker (paints enabled)")
+# A separator becomes { "separator" => true } with no label.
+sep = items.find { |it| it["separator"] }
+assert(!sep.nil?,                      "separator preserved as a widget item")
+assert(!sep.key?("label"),             "separator item has no label")
+# A leaf entry (Exit) carries an action but no chevron.
+exit_it = items.find { |it| it["label"] == "Exit" }
+assert(!exit_it.nil?,                  "Exit leaf present")
+assert_eq(exit_it["action"], "x",      "leaf carries an action marker")
+assert(!exit_it.key?("shortcut"),      "leaf has no chevron shortcut")
 `
