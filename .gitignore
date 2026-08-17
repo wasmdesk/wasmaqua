@@ -2,3 +2,4 @@
 /wasmaqua.wasm
 /wasm_exec.js
 .DS_Store
+/wasmaqua

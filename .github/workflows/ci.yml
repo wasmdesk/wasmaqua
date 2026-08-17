@@ -1,0 +1,65 @@
+# Headless CI for wasmaqua — the macOS-Aqua-themed pure-Go Ruby WASM compositor.
+#
+# One job:
+#   build-and-test — gofmt + go vet, build the compositor wasm (which embeds
+#                    compositor.rb via //go:embed) and the native dev server
+#                    (cmd/serve), run the native Go tests, and run cmd/rbtest
+#                    (proving the pure-WM half of compositor.rb parses +
+#                    executes + passes its Aqua-decoration assertions under the
+#                    native go-embedded-ruby interpreter, not only under MRI).
+#
+# wasmaqua has no external `clients/` and no browser render probes of its own
+# (it reuses wasmbox's client protocol), so there is no headless-render job —
+# unlike its wasmbox sibling. CGO is off everywhere (the whole stack is pure
+# Go); GOWORK=off keeps the module self-contained.
+name: CI
+
+on:
+  push:
+    branches: [main, deps-catchup-and-ci]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  GOWORK: "off"
+  CGO_ENABLED: "0"
+
+jobs:
+  build-and-test:
+    name: Build + native tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.4"
+          check-latest: true
+          cache: true
+
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::these files are not gofmt-clean:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: Build the compositor wasm (embeds compositor.rb)
+        run: GOOS=js GOARCH=wasm go build -o wasmaqua.wasm .
+
+      - name: Build the dev server (cmd/serve)
+        run: go build -o bin/wasmaqua-serve ./cmd/serve
+
+      - name: Native tests
+        run: go test ./...
+
+      - name: rbtest — compositor.rb under go-embedded-ruby
+        run: go run ./cmd/rbtest
