@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.26.4
 
-require github.com/go-embedded-ruby/ruby v0.0.0-20260821180146-e6e9346d95b2
+require github.com/go-embedded-ruby/ruby v0.0.0-20260830083947-2e3fdf557001
 
 require (
 	filippo.io/age v1.3.1 // indirect
