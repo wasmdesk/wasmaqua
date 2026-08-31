@@ -210,6 +210,8 @@ github.com/go-embedded-ruby/ruby v0.0.0-20260830083947-2e3fdf557001 h1:HWrzpb8Ud
 github.com/go-embedded-ruby/ruby v0.0.0-20260830083947-2e3fdf557001/go.mod h1:FxYGdde6qjIJzaEZDAxZ7ocrD5HIt3Nq8itCe3OAezI=
 github.com/go-embedded-ruby/ruby v0.0.0-20260830154855-271a63d1c4f4 h1:fcgLo0Aw118EvaDLTZVD0gr64ps9GruRrJM5Gwlmz+A=
 github.com/go-embedded-ruby/ruby v0.0.0-20260830154855-271a63d1c4f4/go.mod h1:TdjfefoAufDB9Wu90hTZba7fXsmN/LUwcwGuwxeJxz4=
+github.com/go-embedded-ruby/ruby v0.0.0-20260831210744-cf095bc914cc h1:PfuaQHZihjcXruro8YHett2/Lfh1el8NVlAT3AuU0sw=
+github.com/go-embedded-ruby/ruby v0.0.0-20260831210744-cf095bc914cc/go.mod h1:dbZh2v4yxoM62lj5YnzSfnD9wfBAnmWWP1ZrbjIt538=
 github.com/go-facter/facter v0.0.0-20260708052836-752b1a3edee0 h1:1PUT8X4gKZsXEVdoMS//ceD4X2jiK9fEJinyU2iuIpI=
 github.com/go-facter/facter v0.0.0-20260708052836-752b1a3edee0/go.mod h1:ghuoOHWXdq5dE3GLPDiz3Uy0ORrvK+1hB7QC997ez2U=
 github.com/go-fft/fft v0.0.0-20260620110530-0e3ca1747acb h1:kDAxBx5Tvd3PfDIqCgV3J4cpXejsJOOsiKGYQiDTJB4=
@@ -269,6 +271,8 @@ github.com/go-puppet/puppet v0.0.0-20260710130746-3ef04469bb7e h1:5CU5wIZJpj5eW/
 github.com/go-puppet/puppet v0.0.0-20260710130746-3ef04469bb7e/go.mod h1:AaqsDdZnb05OGpLo4iZpZzf243+L4I0dxCZ71gfyKU0=
 github.com/go-regexp/engine v0.1.0 h1:DnQjXFwUldJOcyau/0TAjhl244xC5nFfWy6YJ5aUlVY=
 github.com/go-regexp/engine v0.1.0/go.mod h1:8rju5lq5OkskQh9+m+FjBP6965giMPUdIOdrvFrbqn4=
+github.com/go-regexp/engine v0.1.3 h1:0U5DrrBEYjNX/f0yFESpQDWmJOtXmmZqluNAUBXjfxY=
+github.com/go-regexp/engine v0.1.3/go.mod h1:8rju5lq5OkskQh9+m+FjBP6965giMPUdIOdrvFrbqn4=
 github.com/go-richdoc/richdoc v0.1.0 h1:77dh0m2/Q6cHIgDMY63zy9cUTsGKTdbszT1gtrZUFz4=
 github.com/go-richdoc/richdoc v0.1.0/go.mod h1:aCX8ulqg5CoKqSWgWeEWul1Oj0d2VxQeaQNI0+jsm7c=
 github.com/go-richdoc/richdoc v0.2.0 h1:z9cLox9MoInZL6fIlweMzgDT/VqgnB2ZucSIEaRFglY=
@@ -397,6 +401,8 @@ github.com/go-ruby-find/find v0.0.0-20260630081030-35072d185272 h1:tHmlER04rO8Lx
 github.com/go-ruby-find/find v0.0.0-20260630081030-35072d185272/go.mod h1:wpq0ciEFn8zUc1vfuHRjF2U8mH0krhJCRHHr+JOGaEY=
 github.com/go-ruby-format/format v0.0.0-20260815195335-4038d17b79a1 h1:TgyhqiG4MVsDnL9X1SEhfEEfbdqWooPJFdbJJkyCpK8=
 github.com/go-ruby-format/format v0.0.0-20260815195335-4038d17b79a1/go.mod h1:1tuz12SHPOcnFSfdPYRFwVvRhMT4Xn4M4jfPFgM7pLA=
+github.com/go-ruby-format/format v0.0.0-20260831115501-f58c7d12507c h1:ffhla/GiFfRo9sfePiyW9kvXOx/Y0GYhIk+vinmBgTs=
+github.com/go-ruby-format/format v0.0.0-20260831115501-f58c7d12507c/go.mod h1:1tuz12SHPOcnFSfdPYRFwVvRhMT4Xn4M4jfPFgM7pLA=
 github.com/go-ruby-friendly-id/friendly-id v0.0.0-20260707195609-ff85fef61060 h1:2DOgIkLoef9c3ZEn6qNoWU4Fq/YUIY5bX/iJ4AjE+PQ=
 github.com/go-ruby-friendly-id/friendly-id v0.0.0-20260707195609-ff85fef61060/go.mod h1:DfleWbrCkxABZECUbJBXgF+tBZaX/9UbjH8CimwfrCQ=
 github.com/go-ruby-getoptlong/getoptlong v0.0.0-20260629150025-1a1bfd19bc49 h1:v2Cy3bZTTi+u9XKBRP8FmYHwsWwZ+t8hlh3s4i1gGfQ=
