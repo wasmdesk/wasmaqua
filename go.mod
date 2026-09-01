@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.26.4
 
-require github.com/go-embedded-ruby/ruby v0.0.0-20260830154855-271a63d1c4f4
+require github.com/go-embedded-ruby/ruby v0.0.0-20260831210744-cf095bc914cc
 
 require (
 	filippo.io/age v1.3.1 // indirect
@@ -101,7 +101,7 @@ require (
 	github.com/go-opentype/shape v0.5.0 // indirect
 	github.com/go-pcore/pcore v0.0.0-20260708052910-1416bf219e47 // indirect
 	github.com/go-puppet/puppet v0.0.0-20260710130746-3ef04469bb7e // indirect
-	github.com/go-regexp/engine v0.1.0 // indirect
+	github.com/go-regexp/engine v0.1.3 // indirect
 	github.com/go-richdoc/richdoc v0.2.0 // indirect
 	github.com/go-rouge/rouge v0.1.0 // indirect
 	github.com/go-ruby-aasm/aasm v0.0.0-20260707193337-00a96ee353d7 // indirect
@@ -160,7 +160,7 @@ require (
 	github.com/go-ruby-fast-gettext-locale/fast-gettext-locale v0.0.0-20260709170525-affabfaa9f08 // indirect
 	github.com/go-ruby-fast-gettext/fast-gettext v0.0.0-20260709172829-8beb2fbc96a8 // indirect
 	github.com/go-ruby-find/find v0.0.0-20260630081030-35072d185272 // indirect
-	github.com/go-ruby-format/format v0.0.0-20260815195335-4038d17b79a1 // indirect
+	github.com/go-ruby-format/format v0.0.0-20260831115501-f58c7d12507c // indirect
 	github.com/go-ruby-friendly-id/friendly-id v0.0.0-20260707195609-ff85fef61060 // indirect
 	github.com/go-ruby-getoptlong/getoptlong v0.0.0-20260629150025-1a1bfd19bc49 // indirect
 	github.com/go-ruby-grape/grape v0.0.0-20260702151528-455377c8c7c3 // indirect
