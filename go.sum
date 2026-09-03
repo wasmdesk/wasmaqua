@@ -212,6 +212,8 @@ github.com/go-embedded-ruby/ruby v0.0.0-20260830154855-271a63d1c4f4 h1:fcgLo0Aw1
 github.com/go-embedded-ruby/ruby v0.0.0-20260830154855-271a63d1c4f4/go.mod h1:TdjfefoAufDB9Wu90hTZba7fXsmN/LUwcwGuwxeJxz4=
 github.com/go-embedded-ruby/ruby v0.0.0-20260831210744-cf095bc914cc h1:PfuaQHZihjcXruro8YHett2/Lfh1el8NVlAT3AuU0sw=
 github.com/go-embedded-ruby/ruby v0.0.0-20260831210744-cf095bc914cc/go.mod h1:dbZh2v4yxoM62lj5YnzSfnD9wfBAnmWWP1ZrbjIt538=
+github.com/go-embedded-ruby/ruby v0.0.0-20260902184753-b49a59871445 h1:BmaBTCHGonNFUXLsPux7rGBq3iyWJMvROT1AxJ5Czb8=
+github.com/go-embedded-ruby/ruby v0.0.0-20260902184753-b49a59871445/go.mod h1:dbZh2v4yxoM62lj5YnzSfnD9wfBAnmWWP1ZrbjIt538=
 github.com/go-facter/facter v0.0.0-20260708052836-752b1a3edee0 h1:1PUT8X4gKZsXEVdoMS//ceD4X2jiK9fEJinyU2iuIpI=
 github.com/go-facter/facter v0.0.0-20260708052836-752b1a3edee0/go.mod h1:ghuoOHWXdq5dE3GLPDiz3Uy0ORrvK+1hB7QC997ez2U=
 github.com/go-fft/fft v0.0.0-20260620110530-0e3ca1747acb h1:kDAxBx5Tvd3PfDIqCgV3J4cpXejsJOOsiKGYQiDTJB4=
