@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.26.4
 
-require github.com/go-embedded-ruby/ruby v0.0.0-20260902184753-b49a59871445
+require github.com/go-embedded-ruby/ruby v0.0.0-20260904134842-0cf28d3e74f7
 
 require (
 	filippo.io/age v1.3.1 // indirect
@@ -84,7 +84,6 @@ require (
 	github.com/go-gfx/gfx v0.11.0 // indirect
 	github.com/go-hiera/hiera v0.0.0-20260708051558-73bff6edd0e9 // indirect
 	github.com/go-hocon/hocon v0.0.0-20260709172937-6d69e3b57178 // indirect
-	github.com/go-iconoir/iconoir v0.2.0 // indirect
 	github.com/go-icons/iconoir v0.2.0 // indirect
 	github.com/go-images/images v0.0.0-20260811115337-bc5d586f8e38 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
