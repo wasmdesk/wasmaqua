@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.26.4
 
-require github.com/go-embedded-ruby/ruby v0.0.0-20260907195941-ce0e0c534537
+require github.com/go-embedded-ruby/ruby v0.0.0-20260912151438-e8ad6aff9c1e
 
 require (
 	filippo.io/age v1.3.1 // indirect
@@ -214,7 +214,7 @@ require (
 	github.com/go-ruby-pagy/pagy v0.0.0-20260707193354-a84fe1d16a86 // indirect
 	github.com/go-ruby-paper-trail/paper-trail v0.0.0-20260707193452-4e10f2b4d0b3 // indirect
 	github.com/go-ruby-parquet/parquet v0.0.0-20260704170648-c7f0507946f7 // indirect
-	github.com/go-ruby-parser/parser v0.1.8 // indirect
+	github.com/go-ruby-parser/parser v0.1.9 // indirect
 	github.com/go-ruby-pathname/pathname v0.0.0-20260629151955-d8d2c4e5f81b // indirect
 	github.com/go-ruby-pg/pg v0.0.0-20260702135906-e5650264cc5d // indirect
 	github.com/go-ruby-prawn/prawn v0.0.0-20260728194101-a5f2d786bf88 // indirect
