@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.27.1
 
-require github.com/go-embedded-ruby/ruby v0.0.0-20261002144622-0e38f04000a9
+require github.com/go-embedded-ruby/ruby v0.2.0
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -13,7 +13,7 @@ require (
 	github.com/RoaringBitmap/roaring/v2 v2.14.5 // indirect
 	github.com/abtreece/confd v0.41.2 // indirect
 	github.com/ajroetker/go-highway v0.0.4 // indirect
-	github.com/andybalholm/brotli v1.2.3 // indirect
+	github.com/andybalholm/brotli v1.2.5 // indirect
 	github.com/apache/arrow-go/v18 v18.8.0 // indirect
 	github.com/apache/thrift v0.24.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
@@ -77,12 +77,12 @@ require (
 	github.com/go-composites/null v0.0.0-20260903220223-c1d743488d23 // indirect
 	github.com/go-composites/result v0.0.0-20260927170344-f2c7344faeef // indirect
 	github.com/go-composites/time v0.0.0-20260929013028-aa3c57ae1371 // indirect
-	github.com/go-crdt/collab v0.25.0 // indirect
-	github.com/go-crdt/crdt v0.31.0 // indirect
+	github.com/go-crdt/collab v0.74.0 // indirect
+	github.com/go-crdt/crdt v0.55.0 // indirect
 	github.com/go-datetime/dates v0.1.0 // indirect
 	github.com/go-encryptions/unixcrypt v0.1.0 // indirect
 	github.com/go-facter/facter v0.0.0-20260830120958-454b72e642ab // indirect
-	github.com/go-fft/fft v0.1.1 // indirect
+	github.com/go-fft/fft v0.1.14 // indirect
 	github.com/go-gfx/gfx v0.34.0 // indirect
 	github.com/go-hiera/hiera v0.0.0-20260830144306-f9304f6bec92 // indirect
 	github.com/go-hocon/hocon v0.0.0-20260831114632-08e716b40e6d // indirect
@@ -93,22 +93,22 @@ require (
 	github.com/go-images/jpeg2000 v0.1.0 // indirect
 	github.com/go-images/png v0.1.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
-	github.com/go-kramdown/kramdown v0.1.0 // indirect
+	github.com/go-kramdown/kramdown v0.2.0 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.14 // indirect
-	github.com/go-liquid/liquid v0.1.0 // indirect
+	github.com/go-liquid/liquid v0.1.1 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-mustache/mustache v0.1.0 // indirect
-	github.com/go-ndarray/ndarray v0.0.0-20260930182958-73ce783e24f7 // indirect
+	github.com/go-ndarray/ndarray v0.3.0 // indirect
 	github.com/go-nokogiri/nokogiri v0.1.0 // indirect
-	github.com/go-opentype/fonts v0.8.0 // indirect
+	github.com/go-opentype/fonts v0.10.0 // indirect
 	github.com/go-opentype/opentype v0.13.0 // indirect
 	github.com/go-opentype/shape v0.5.0 // indirect
 	github.com/go-pcore/pcore v0.0.0-20260831114716-f9c3e7f59eaa // indirect
 	github.com/go-puppet/puppet v0.0.0-20260918012035-fc6b0424cdbd // indirect
 	github.com/go-regexp/engine v0.1.3 // indirect
-	github.com/go-richdoc/richdoc v0.2.0 // indirect
-	github.com/go-rouge/rouge v0.2.0 // indirect
+	github.com/go-richdoc/richdoc v0.4.0 // indirect
+	github.com/go-rouge/rouge v0.3.0 // indirect
 	github.com/go-ruby-aasm/aasm v0.0.0-20260717061120-cec0976ec205 // indirect
 	github.com/go-ruby-abbrev/abbrev v0.0.0-20260916090008-ac08b8471830 // indirect
 	github.com/go-ruby-acme/acme v0.0.0-20260910083506-2c4b2786f606 // indirect
@@ -213,14 +213,14 @@ require (
 	github.com/go-ruby-omniauth/omniauth v0.0.0-20260923203916-25cee0673a57 // indirect
 	github.com/go-ruby-openbao/openbao v0.0.0-20260717071447-328a091965dd // indirect
 	github.com/go-ruby-openstack/openstack v0.0.0-20260923203924-9000c374d63c // indirect
-	github.com/go-ruby-opentelemetry/opentelemetry v0.0.0-20260826125821-3371d170a93c // indirect
-	github.com/go-ruby-opentype/opentype v0.2.0 // indirect
+	github.com/go-ruby-opentelemetry/opentelemetry v0.0.0-20261003102038-c7cc0d3679e1 // indirect
+	github.com/go-ruby-opentype/opentype v0.3.0 // indirect
 	github.com/go-ruby-optparse/optparse v0.0.0-20260917100925-33b18da76c37 // indirect
 	github.com/go-ruby-ostruct/ostruct v0.0.0-20260927145508-48818b0ca96e // indirect
 	github.com/go-ruby-pagy/pagy v0.0.0-20260717071719-997d15eee011 // indirect
 	github.com/go-ruby-paper-trail/paper-trail v0.0.0-20260717071745-42a249656e5a // indirect
 	github.com/go-ruby-parquet/parquet v0.0.0-20260923211642-bc75bcb9031e // indirect
-	github.com/go-ruby-parser/parser v0.10.0 // indirect
+	github.com/go-ruby-parser/parser v0.11.1 // indirect
 	github.com/go-ruby-pathname/pathname v0.0.0-20260916100446-0824484b665f // indirect
 	github.com/go-ruby-pg/pg v0.0.0-20260916100523-3831ec811a67 // indirect
 	github.com/go-ruby-prawn/prawn v0.0.0-20260927145511-370d5985305c // indirect
@@ -281,9 +281,9 @@ require (
 	github.com/go-ruby-webauthn/webauthn v0.0.0-20260921104542-2bb711883889 // indirect
 	github.com/go-ruby-webmock/webmock v0.0.0-20260717075423-a92c67f51b7f // indirect
 	github.com/go-ruby-webrick/webrick v0.0.0-20260927173350-a71c0afa01d4 // indirect
-	github.com/go-ruby-widgets/mvvm v0.1.0 // indirect
-	github.com/go-ruby-widgets/tui v0.3.0 // indirect
-	github.com/go-ruby-widgets/widgets v0.11.0 // indirect
+	github.com/go-ruby-widgets/mvvm v0.2.0 // indirect
+	github.com/go-ruby-widgets/tui v0.4.0 // indirect
+	github.com/go-ruby-widgets/widgets v0.12.0 // indirect
 	github.com/go-ruby-yaml/yaml v0.0.0-20260916104302-910ced2db1c7 // indirect
 	github.com/go-ruby-zeitwerk/zeitwerk v0.0.0-20260916104335-29169305e951 // indirect
 	github.com/go-ruby-zlib/zlib v0.0.0-20260927173414-e9d862990b6d // indirect
@@ -297,9 +297,9 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/go-webauthn/webauthn v0.18.2 // indirect
 	github.com/go-webauthn/x v0.3.1 // indirect
-	github.com/go-widgets/mvvm v0.8.0 // indirect
-	github.com/go-widgets/painter v0.11.0 // indirect
-	github.com/go-widgets/toolkit v0.288.0 // indirect
+	github.com/go-widgets/mvvm v0.9.0 // indirect
+	github.com/go-widgets/painter v0.13.0 // indirect
+	github.com/go-widgets/toolkit v0.321.2 // indirect
 	github.com/go-widgets/tui v0.61.0 // indirect
 	github.com/go-xslt/xslt v0.1.0 // indirect
 	github.com/go-zookeeper/zk v1.0.4 // indirect
@@ -374,10 +374,11 @@ require (
 	go.etcd.io/etcd/client/v3 v3.7.2 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.9.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/otel v1.46.0 // indirect
-	go.opentelemetry.io/otel/metric v1.46.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.46.0 // indirect
-	go.opentelemetry.io/otel/trace v1.46.0 // indirect
+	go.opentelemetry.io/otel v1.47.0 // indirect
+	go.opentelemetry.io/otel/log v1.47.0 // indirect
+	go.opentelemetry.io/otel/metric v1.47.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.47.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
