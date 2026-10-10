@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.27.1
 
-require github.com/go-embedded-ruby/ruby v0.2.0
+require github.com/go-embedded-ruby/ruby v0.3.0
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/go-opentype/shape v0.5.0 // indirect
 	github.com/go-pcore/pcore v0.0.0-20260831114716-f9c3e7f59eaa // indirect
 	github.com/go-puppet/puppet v0.0.0-20260918012035-fc6b0424cdbd // indirect
-	github.com/go-regexp/engine v0.1.3 // indirect
+	github.com/go-regexp/engine v0.3.0 // indirect
 	github.com/go-richdoc/richdoc v0.4.0 // indirect
 	github.com/go-rouge/rouge v0.3.0 // indirect
 	github.com/go-ruby-aasm/aasm v0.0.0-20260717061120-cec0976ec205 // indirect
@@ -220,7 +220,7 @@ require (
 	github.com/go-ruby-pagy/pagy v0.0.0-20260717071719-997d15eee011 // indirect
 	github.com/go-ruby-paper-trail/paper-trail v0.0.0-20260717071745-42a249656e5a // indirect
 	github.com/go-ruby-parquet/parquet v0.0.0-20260923211642-bc75bcb9031e // indirect
-	github.com/go-ruby-parser/parser v0.11.1 // indirect
+	github.com/go-ruby-parser/parser v0.13.1 // indirect
 	github.com/go-ruby-pathname/pathname v0.0.0-20260916100446-0824484b665f // indirect
 	github.com/go-ruby-pg/pg v0.0.0-20260916100523-3831ec811a67 // indirect
 	github.com/go-ruby-prawn/prawn v0.0.0-20260927145511-370d5985305c // indirect
@@ -241,7 +241,7 @@ require (
 	github.com/go-ruby-ransack/ransack v0.0.0-20260717072959-06ca1d7c6829 // indirect
 	github.com/go-ruby-rdoc/rdoc v0.0.0-20260916101528-7ed1d61f5088 // indirect
 	github.com/go-ruby-redis/redis v0.0.0-20260916101628-3b91d134e9dc // indirect
-	github.com/go-ruby-regexp/regexp v0.0.0-20260927145504-6cbb63926eb2 // indirect
+	github.com/go-ruby-regexp/regexp v0.1.0 // indirect
 	github.com/go-ruby-reline/reline v0.0.0-20260916101734-37c7d2c11d74 // indirect
 	github.com/go-ruby-resolv/resolv v0.0.0-20260916101809-a2b1b027ae6d // indirect
 	github.com/go-ruby-resque/resque v0.0.0-20260903192756-dc5f8e3f2e80 // indirect
