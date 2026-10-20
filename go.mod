@@ -2,7 +2,7 @@ module github.com/wasmdesk/wasmaqua
 
 go 1.27.2
 
-require github.com/go-embedded-ruby/ruby v0.6.0
+require github.com/go-embedded-ruby/ruby v0.8.1
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -99,8 +99,11 @@ require (
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-mustache/mustache v0.1.0 // indirect
-	github.com/go-ndarray/ndarray v0.11.0 // indirect
+	github.com/go-ndarray/ndarray v0.12.0 // indirect
 	github.com/go-nokogiri/nokogiri v0.1.0 // indirect
+	github.com/go-numerics/integrate v0.2.0 // indirect
+	github.com/go-numerics/optimize v0.2.0 // indirect
+	github.com/go-numerics/special v0.1.0 // indirect
 	github.com/go-opentype/fonts v0.10.0 // indirect
 	github.com/go-opentype/opentype v0.13.0 // indirect
 	github.com/go-opentype/shape v0.5.0 // indirect
@@ -293,6 +296,7 @@ require (
 	github.com/go-simd/crc32 v0.0.0-20260903220012-5f164e0e0487 // indirect
 	github.com/go-simd/hex v0.0.0-20260903220024-a8d22a843218 // indirect
 	github.com/go-sql-driver/mysql v1.10.1 // indirect
+	github.com/go-statistics/stats v0.1.0 // indirect
 	github.com/go-typeset/bidi v0.3.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/go-webauthn/webauthn v0.18.2 // indirect
